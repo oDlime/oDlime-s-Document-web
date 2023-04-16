@@ -1,8 +1,14 @@
 <template>
   <div id="app">
     <el-container class="blur container">
-      <el-aside class="blur" width="300px" v-if="listdata.data">
+      <el-aside class="blur" width="300px" v-if="listdata.data" :class="{ showaside: showaside }">
         <el-row class="asidehead">
+          <el-button
+            icon="el-icon-menu"
+            size="mini"
+            round
+            @click="menushow()"
+          ></el-button>
           <el-button icon="el-icon-folder-add" size="mini" round @click="newdir"
             >新建</el-button
           >
@@ -62,6 +68,13 @@
         </div>
       </el-aside>
       <el-main>
+        <el-button
+            icon="el-icon-menu"
+            size="mini"
+            round
+            @click="menushow()"
+            v-show="showaside"
+          ></el-button>
         <div class="contentmain">
           <el-breadcrumb separator="/" class="navlink">
             <el-breadcrumb-item :to="{ path: '/' }"
@@ -125,6 +138,7 @@ export default {
     return {
       serveripandport: "http://127.0.0.1:8080",
       key: "",
+      showaside:false,
       isfirst: true,
       listdata: { data: [] },
       pathList: [], // 记录已经点击的列表项，用于拼接成目录url
@@ -140,6 +154,9 @@ export default {
   },
   components: {},
   methods: {
+    menushow(){
+      this.showaside = !this.showaside;
+    },
     setserve() {
       this.$prompt("http://ip:port", "修改服务器", {
         confirmButtonText: "确定",
@@ -364,6 +381,10 @@ body {
 }
 .container {
   height: 100%;
+  transition: .5s;
+}
+.container .showaside{
+  display: none;
 }
 .asidelist {
   padding: 20px 20px 100px 20px;
