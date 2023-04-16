@@ -72,16 +72,22 @@
             <el-breadcrumb-item
               v-for="(item, index) in pathList"
               :key="index"
-              :to="{ path: '/' }">
-            <span @click="linkto(index)">{{ item }}</span></el-breadcrumb-item>
+              :to="{ path: '/' }"
+            >
+              <span @click="linkto(index)">{{ item }}</span></el-breadcrumb-item
+            >
           </el-breadcrumb>
           <!-- 起始页 -->
-          <div v-show="isfirst" class="home"> 
+          <div v-show="isfirst" class="home">
             <div class="box">
-              <el-link type="info" icon="el-icon-key" @click="newakey()">{{ key===""?"输入密钥":"修改密钥" }}</el-link><br>
-              <el-link type="info" icon="el-icon-set-up" @click="setserve()"> 服务器地址 </el-link>
+              <el-link type="info" icon="el-icon-key" @click="newakey()">{{
+                key === "" ? "输入密钥" : "修改密钥"
+              }}</el-link
+              ><br />
+              <el-link type="info" icon="el-icon-set-up" @click="setserve()">
+                服务器地址
+              </el-link>
             </div>
-
           </div>
           <el-collapse-transition>
             <v-md-editor
@@ -121,9 +127,9 @@ export default {
   name: "App",
   data() {
     return {
-      serveripandport:"http://127.0.0.1:8080",
+      serveripandport: "http://127.0.0.1:8080",
       key: "",
-      isfirst:true,
+      isfirst: true,
       listdata: { data: [] },
       pathList: [], // 记录已经点击的列表项，用于拼接成目录url
       content: "",
@@ -138,11 +144,11 @@ export default {
   },
   components: {},
   methods: {
-    setserve(){
+    setserve() {
       this.$prompt("http://ip:port", "修改服务器", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
-        inputValue:this.serveripandport
+        inputValue: this.serveripandport,
       })
         .then(({ value }) => {
           const d = new Date();
@@ -281,12 +287,22 @@ export default {
       return this.pathList.join("/");
     },
     httpdata({ url, path, name, oldname, content }) {
+      axios.defaults.crossDomain = true;
+      axios.defaults.headers.common["Access-Control-Allow-Origin"] =
+        process.env.VUE_APP_Access_Control_Allow_Origin;
+
       axios
-        .post(this.serveripandport+"//" + url, { path, name, oldname, content,key:this.key })
+        .post(this.serveripandport + "//" + url, {
+          path,
+          name,
+          oldname,
+          content,
+          key: this.key,
+        })
         .then((response) => {
           if (response.data.code !== 200) {
             this.$message.error(response.data.msg);
-            if(response.data.msg === "身份验证失败"){
+            if (response.data.msg === "身份验证失败") {
               this.key = "";
               this.newakey();
             }
@@ -439,11 +455,10 @@ pre code {
 .mdeditor {
   height: 88%;
 }
-.home{
+.home {
   /* background: #a1a1a1; */
   width: 300px;
   height: 350px;
   margin: 5% 10%;
 }
-
 </style>
