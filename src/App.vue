@@ -58,7 +58,7 @@
               {{ value }}
             </div>
             <br /><br /><br /><br />
-          </div> 
+          </div>
         </div>
       </el-aside>
       <el-main>
@@ -79,23 +79,23 @@
           </el-breadcrumb>
 
           <v-md-editor
-              v-model="mds"
-              v-show="editing"
-              class="mdeditor"
-              @save="savemd"
-            ></v-md-editor>
-            <div
-              v-show="!islodding && !editing"
-              class="content"
-              v-html="this.content"
-            ></div>
+            v-model="mds"
+            v-show="editing"
+            class="mdeditor"
+            @save="savemd"
+          ></v-md-editor>
+          <div
+            v-show="!islodding && !editing"
+            class="content"
+            v-html="this.content"
+          ></div>
           <div v-show="islodding">
             <el-skeleton :rows="3" animated /> <br /><br />
             <el-skeleton :rows="4" animated /><br /><br />
             <el-skeleton :rows="6" animated />
           </div>
           <!-- 起始页 -->
-          <div v-show="isfirst&&!islodding" class="home">
+          <div v-show="isfirst && !islodding" class="home">
             <div class="box">
               <el-link type="info" icon="el-icon-key" @click="newakey()">{{
                 key === "" ? "输入密钥" : "修改密钥"
@@ -282,6 +282,9 @@ export default {
       return this.pathList.join("/");
     },
     httpdata({ url, path, name, oldname, content }) {
+      axios.defaults.crossDomain = true;
+      axios.defaults.headers.common["Access-Control-Allow-Origin"] =
+        process.env.VUE_APP_Access_Control_Allow_Origin;
       axios
         .post(
           this.serveripandport + "/" + url,
