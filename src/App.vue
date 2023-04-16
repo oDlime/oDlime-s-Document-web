@@ -77,8 +77,25 @@
               <span @click="linkto(index)">{{ item }}</span></el-breadcrumb-item
             >
           </el-breadcrumb>
+
+          <v-md-editor
+            v-model="mds"
+            v-show="editing"
+            class="mdeditor"
+            @save="savemd"
+          ></v-md-editor>
+          <div
+            v-show="!islodding && !editing"
+            class="content"
+            v-html="this.content"
+          ></div>
+          <div v-show="islodding">
+            <el-skeleton :rows="3" animated /> <br /><br />
+            <el-skeleton :rows="4" animated /><br /><br />
+            <el-skeleton :rows="6" animated />
+          </div>
           <!-- 起始页 -->
-          <div v-show="isfirst" class="home">
+          <div v-show="isfirst && !islodding" class="home">
             <div class="box">
               <el-link type="info" icon="el-icon-key" @click="newakey()">{{
                 key === "" ? "输入密钥" : "修改密钥"
@@ -89,33 +106,12 @@
               </el-link>
             </div>
           </div>
-          <el-collapse-transition>
-            <v-md-editor
-              v-model="mds"
-              v-show="editing"
-              class="mdeditor"
-              @save="savemd"
-            ></v-md-editor>
-          </el-collapse-transition>
-          <el-collapse-transition>
-            <div
-              v-show="!islodding && !editing"
-              class="content"
-              v-html="this.content"
-            ></div>
-          </el-collapse-transition>
-          <transition name="el-fade-in">
-            <div v-show="islodding">
-              <el-skeleton :rows="3" animated /> <br /><br />
-              <el-skeleton :rows="4" animated /><br /><br />
-              <el-skeleton :rows="6" animated />
-            </div>
-          </transition>
-          <br /><br /><br /><br />
         </div>
+        <br /><br /><br /><br />
       </el-main>
     </el-container>
   </div>
+  
 </template>
 
 <script src="./assets/js/md5"></script>
@@ -257,12 +253,12 @@ export default {
     },
     listclick(value) {
       this.activeindex = -1;
-      this.islodding = true;
       const path = this.pathList.concat([value]).join("/");
       this.getdata({ url: "md", path });
       if (!path.includes(".md")) {
         this.pathList.push(value);
       } else {
+        this.islodding = true;
         this.content = "";
         this.filename = value;
         this.filepath = this.getthisurl();
@@ -288,17 +284,14 @@ export default {
     },
     httpdata({ url, path, name, oldname, content }) {
       axios.defaults.crossDomain = true;
-      axios.defaults.headers.common["Access-Control-Allow-Origin"] =
+      axios.defaults.headers.common["Access-Control-Allow-Origin"] =  
         process.env.VUE_APP_Access_Control_Allow_Origin;
-
       axios
-        .post(this.serveripandport + "//" + url, {
-          path,
-          name,
-          oldname,
-          content,
-          key: this.key,
-        })
+        .post(
+          this.serveripandport + "/" + url,
+          { path, name, oldname, content, key: this.key },
+          { timeout: 1000 * 20 }
+        )
         .then((response) => {
           if (response.data.code !== 200) {
             this.$message.error(response.data.msg);
@@ -319,7 +312,7 @@ export default {
           this.islodding = false;
         })
         .catch((error) => {
-          console.error(error);
+          this.$message.error(error);
         });
     },
     getdata(path) {
@@ -327,8 +320,6 @@ export default {
     },
   },
   mounted() {
-    this.getdata({ url: "md", path: "" });
-
     let value = "";
     const cookieString = document.cookie;
     const cookieArray = cookieString.split(";");
@@ -343,6 +334,8 @@ export default {
         this.serveripandport = value;
       }
     }
+    console.log(this.serveripandport);
+    this.getdata({ url: "md", path: "" });
   },
 };
 </script>
@@ -443,7 +436,7 @@ pre code {
   user-select: all;
 }
 .content {
-  padding: 180px 90px 80px 90px;
+  padding: 20px 90px 80px 90px;
   margin: 40px 0px;
 }
 
